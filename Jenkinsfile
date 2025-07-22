@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'agent' }
 
     environment {
         DOCKER_REPO_CREDENTIALS = '3158d61a-c47d-4272-b324-c5e86342f835'
