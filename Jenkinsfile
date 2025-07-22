@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REPO_CREDENTIALS = 'd7c71435-4e54-456a-93b1-51a4f2935613'
+        DOCKER_REPO_CREDENTIALS = 'b02689ec-9bee-40a2-9c2d-42ff19a4dbcc'
         DOCKER_IMAGE = 'varaprasadmp/k8s'          
         GIT_REPO = 'https://github.com/varaprasad070693/k8s'
         BRANCH = 'main'
