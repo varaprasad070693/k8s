@@ -2,9 +2,9 @@ pipeline {
     agent { label'docker' }
 
     environment {
-        DOCKER_REPO_CREDENTIALS = '7aaafea6-7662-43fd-975a-fae773d06447'
-        DOCKER_IMAGE = 'varaprasadmp/vp'          
-        GIT_REPO = 'https://github.com/varaprasad070693/docker'
+        DOCKER_REPO_CREDENTIALS = 'd7c71435-4e54-456a-93b1-51a4f2935613'
+        DOCKER_IMAGE = 'varaprasadmp/k8s'          
+        GIT_REPO = 'https://github.com/varaprasad070693/k8s'
         BRANCH = 'main'
     }
 
@@ -19,12 +19,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
-                    IMAGE_TAG_COMMIT = "${DOCKER_IMAGE}:${COMMIT_HASH}"
                     IMAGE_TAG_LATEST = "${DOCKER_IMAGE}:latest"
-
-                    echo "Building Docker image with tags: ${IMAGE_TAG_COMMIT} and ${IMAGE_TAG_LATEST}"
-                    sh "docker build -t ${IMAGE_TAG_COMMIT} -t ${IMAGE_TAG_LATEST} ."
+                    echo "Building Docker image with tags: ${IMAGE_TAG_LATEST}"
+                    sh "docker build -t ${IMAGE_TAG_LATEST} ."
                 }
             }
         }
@@ -44,9 +41,7 @@ pipeline {
             steps {
                 script {
                     echo "Pushing images to registry"
-                    echo "IMAGE_TAG_COMMIT: ${IMAGE_TAG_COMMIT}"
                     echo "IMAGE_TAG_LATEST: ${IMAGE_TAG_LATEST}"
-                    sh "docker push ${IMAGE_TAG_COMMIT}"
                     sh "docker push ${IMAGE_TAG_LATEST}"
                 }
             }
@@ -55,13 +50,11 @@ pipeline {
 
     post {
         success {
-            echo " Build and push completed successfully!"
+            echo " Deployed Successfully!"
         }
         failure {
-            echo " Build or push failed. Check logs for details."
+            echo " Deployment failed"
         }
-        always {
-            echo " Build finished: ${currentBuild.currentResult}"
-        }
+        
     }
 }
