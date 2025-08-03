@@ -1,60 +1,69 @@
 pipeline {
-    agent { label 'agent' }
+  agent any
 
-    environment {
-        DOCKER_REPO_CREDENTIALS = '3158d61a-c47d-4272-b324-c5e86342f835'
-        DOCKER_IMAGE = 'varaprasadmp/k8s'          
-        GIT_REPO = 'https://github.com/varaprasad070693/k8s'
-        BRANCH = 'main'
+  tools {
+    maven 'Maven 3.9.4' // Ensure this matches the name under Jenkins → Global Tool Configuration
+  }
+
+  environment {
+    SONAR_TOKEN = credentials('SONAR_TOKEN') // Must be stored as 'Secret text' in Jenkins credentials
+  }
+
+  parameters {
+    string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git branch to build')
+  }
+
+  triggers {
+    githubPush()
+  }
+
+  stages {
+
+    stage('Checkout Code') {
+      steps {
+        checkout([
+          $class: 'GitSCM',
+          branches: [[name: "*/${params.BRANCH_NAME}"]],
+          userRemoteConfigs: [[url: 'https://github.com/varaprasad070693/k8s.git']]
+        ])
+      }
     }
 
-    stages {
-        stage('Clone Repository') {
-            steps {
-                echo "Cloning repository from ${GIT_REPO}"
-                git branch: "${BRANCH}", url: "${GIT_REPO}"
-            }
+    stage('SonarQube Scan') {
+      steps {
+        withSonarQubeEnv('MySonar') {
+          sh '''
+            mvn clean verify sonar:sonar \
+              -Dsonar.projectKey=myproject \
+              -Dsonar.host.url=http://13.201.32.1:30002/ \
+              -Dsonar.login=$SONAR_TOKEN
+          '''
         }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    IMAGE_TAG_LATEST = "${DOCKER_IMAGE}:latest"
-                    echo "Building Docker image with tags: ${IMAGE_TAG_LATEST}"
-                    sh "docker build -t ${IMAGE_TAG_LATEST} ."
-                }
-            }
-        }
-
-        stage('Authenticate with Docker Registry') {
-            steps {
-                script {
-                    echo "Logging in to Docker registry"
-                    withCredentials([usernamePassword(credentialsId: "${DOCKER_REPO_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-                    }
-                }
-            }
-        }
-
-        stage('Push Docker Images') {
-            steps {
-                script {
-                    echo "Pushing images to registry"
-                    echo "IMAGE_TAG_LATEST: ${IMAGE_TAG_LATEST}"
-                    sh "docker push ${IMAGE_TAG_LATEST}"
-                }
-            }
-        }
+      }
     }
 
-    post {
-        success {
-            echo " Deployed Successfully!"
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
         }
-        failure {
-            echo " Deployment failed"
-        }
-        
+      }
     }
+
+    stage('Build & Package') {
+      steps {
+        sh 'mvn clean package'
+        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+      }
+    }
+  }
+
+  post {
+    success {
+      echo ' Build, scan, and packaging successful.'
+    }
+    failure {
+      echo ' Build or analysis failed.'
+    }
+  }
 }
