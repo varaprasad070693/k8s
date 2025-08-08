@@ -104,7 +104,7 @@ pipeline {
             def image = "${env.NEXUS_DOCKER_REPO}/sonarqube-app:1.0.0-SNAPSHOT"
             def registry = env.NEXUS_DOCKER_REPO.split('/')[0]
             sh """
-              echo "$NEXUS_DOCKER_PSW" | docker login https://${registry} -u "$NEXUS_DOCKER_USR" --password-stdin
+              echo "$NEXUS_PSW" | docker login https://${registry} -u "$NEXUS_USR" --password-stdin
               docker push ${image}
               docker logout https://${registry}
             """
