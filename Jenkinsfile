@@ -77,8 +77,6 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'NEXUS_CRED', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
           configFileProvider([configFile(fileId: '37ac4e82-23d9-4b4a-bbe0-dc83addc601a', targetLocation: 'settings.xml')]) {
             sh """
-              sed -i 's|<username>.*</username>|<username>$NEXUS_USER</username>|' settings.xml
-              sed -i 's|<password>.*</password>|<password>$NEXUS_PASS</password>|' settings.xml
               mvn clean deploy -s settings.xml -DskipTests
             """
           }
