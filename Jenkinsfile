@@ -99,7 +99,7 @@ pipeline {
     stage('Push Docker Image to Nexus') {
       steps {
         echo 'Pushing Docker image to Nexus...'
-        withCredentials([usernamePassword(credentialsId: 'NEXUS_CRED', usernameVariable: 'NEXUS_DOCKER_USR', passwordVariable: 'NEXUS_DOCKER_PSW')]) {
+        withCredentials([usernamePassword(credentialsId: 'NEXUS_CRED', usernameVariable: 'NEXUS_USR', passwordVariable: 'NEXUS_PSW')]) {
           script {
             def image = "${env.NEXUS_DOCKER_REPO}/sonarqube-app:1.0.0-SNAPSHOT"
             def registry = env.NEXUS_DOCKER_REPO.split('/')[0]
