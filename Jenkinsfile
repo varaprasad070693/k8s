@@ -79,7 +79,7 @@ pipeline {
             sh """
               sed -i "s|<username>.*</username>|<username>${NEXUS_USER}</username>|" settings.xml
               sed -i "s|<password>.*</password>|<password>${NEXUS_PASS}</password>|" settings.xml
-              mvn deploy -s settings.xml -DskipTests
+              mvn clean package -s settings.xml -DskipTests
             """
           }
         }
