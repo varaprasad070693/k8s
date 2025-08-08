@@ -101,10 +101,10 @@ pipeline {
         echo 'Pushing Docker image to Nexus...'
         withCredentials([usernamePassword(credentialsId: 'NEXUS_CRED', usernameVariable: 'NEXUS_USR', passwordVariable: 'NEXUS_PSW')]) {
           script {
-            def image = "${env.NEXUS_DOCKER_REPO}/sonarqube-app:1.0.0-SNAPSHOT"
+            def image = "${env.NEXUS_DOCKER_REPO}/my-app:1.0.0-SNAPSHOT"
             def registry = env.NEXUS_DOCKER_REPO.split('/')[0]
             sh """
-              echo "$NEXUS_PSW" | docker login https://${registry} -u "$NEXUS_USR" --password-stdin
+              echo "$NEXUS_PSW" | docker login http://${registry} -u "$NEXUS_USR" --password-stdin
               docker push ${image}
               docker logout https://${registry}
             """
@@ -116,7 +116,7 @@ pipeline {
 
   post {
     success {
-      echo 'Full CI/CD pipeline succeeded.'
+      echo 'pipeline successful.'
     }
     failure {
       echo 'Pipeline failed. Please check the logs.'
