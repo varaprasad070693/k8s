@@ -5,7 +5,7 @@ FROM openjdk:21-slim
 WORKDIR /app
 
 # Copy compiled jar to container
-COPY target/sonarqube-app-1.0.0-SNAPSHOT.jar app.jar
+COPY target/my-app-1.0.0-SNAPSHOT.jar app.jar
 
 # Set default command
 ENTRYPOINT ["java", "-jar", "app.jar"]
