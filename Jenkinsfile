@@ -90,7 +90,7 @@ pipeline {
       steps {
         echo 'Building Docker image...'
         script {
-          def image = "${env.NEXUS_DOCKER_REPO}/sonarqube-app:1.0.0-SNAPSHOT"
+          def image = "${env.NEXUS_DOCKER_REPO}/my-app:1.0.0-SNAPSHOT"
           sh "docker build -t ${image} ."
         }
       }
