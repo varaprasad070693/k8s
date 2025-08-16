@@ -9,7 +9,7 @@ pipeline {
     SONAR_TOKEN        = credentials('SONAR_TOKEN')        // Secret Text
     NEXUS_CRED         = credentials('NEXUS_CRED')        // Username + Password
     NEXUS_DOCKER_REPO  = '15.206.80.6:5000/docker_dev'   // Nexus Docker repo (no http:// prefix)
-    SONAR_HOST         = 'http://13.233.140.239:30002'      // SonarQube endpoint (no trailing slash)
+    SONAR_HOST         = 'http://3.6.87.229:30002'      // SonarQube endpoint (no trailing slash)
   }
 
   parameters {
@@ -41,18 +41,25 @@ pipeline {
     }
 
     stage('SonarQube Scan') {
-      steps {
-        echo 'Running SonarQube scan...'
-        withSonarQubeEnv('MySonar') {
-          sh """
-            mvn clean verify sonar:sonar \\
-              -Dsonar.projectKey=myproject \\
-              -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \\
-              -Dsonar.login=$SONAR_TOKEN
-          """
-        }
-      }
+  steps {
+    script {
+      def buildDate = new Date().format("yyyy-MM-dd HH:mm:ss")
+      def buildNumber = env.BUILD_NUMBER
+      echo "Starting SonarQube scan..."
+      echo "Build Number: ${buildNumber}"
+      echo "Build Date: ${buildDate}"
     }
+
+    withSonarQubeEnv('MySonar') {
+      sh """
+        mvn clean verify sonar:sonar \\
+          -Dsonar.projectKey=myproject \\
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \\
+          -Dsonar.login=$SONAR_TOKEN
+      """
+    }
+  }
+}
 
     stage('Quality Gate') {
       steps {
