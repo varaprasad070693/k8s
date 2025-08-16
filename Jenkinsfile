@@ -53,9 +53,10 @@ pipeline {
     withSonarQubeEnv('MySonar') {
       sh """
         mvn clean verify sonar:sonar \\
-          -Dsonar.projectKey=myproject \\
-          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \\
-          -Dsonar.login=$SONAR_TOKEN
+    -Dsonar.projectKey=myproject \\
+    -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \\
+    -Dsonar.login=$SONAR_TOKEN \\
+    -Dsonar.buildString="Build #${buildNumber} - ${buildDate}"
       """
     }
   }
