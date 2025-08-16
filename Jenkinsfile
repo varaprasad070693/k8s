@@ -40,7 +40,7 @@ pipeline {
       }
     }
 
-    stage('SonarQube Scan') {
+ stage('SonarQube Scan') {
   steps {
     script {
       def buildDate = new Date().format("yyyy-MM-dd HH:mm:ss")
@@ -48,19 +48,22 @@ pipeline {
       echo "Starting SonarQube scan..."
       echo "Build Number: ${buildNumber}"
       echo "Build Date: ${buildDate}"
-    }
 
-    withSonarQubeEnv('MySonar') {
-      sh """
-        mvn clean verify sonar:sonar \\
-    -Dsonar.projectKey=myproject \\
-    -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \\
-    -Dsonar.login=$SONAR_TOKEN \\
-    -Dsonar.buildString="Build #${buildNumber} - ${buildDate}"
-      """
+      withSonarQubeEnv('MySonar') {
+        withEnv(["BUILD_DATE=${buildDate}", "BUILD_NUMBER=${buildNumber}"]) {
+          sh '''
+            mvn clean verify sonar:sonar \
+              -Dsonar.projectKey=myproject \
+              -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+              -Dsonar.login=$SONAR_TOKEN \
+              -Dsonar.buildString="Build #$BUILD_NUMBER - $BUILD_DATE"
+          '''
+        }
+      }
     }
   }
 }
+
 
     stage('Quality Gate') {
       steps {
